@@ -35,11 +35,11 @@ def DoIteration(screen):
             off_y = base_offset + row * square_pixels
             if nodes[row][col] & north:
                 assert row > 0, "Can't draw north of row 0"
-                assert nodes[row-1][col] & south
+                assert nodes[row-1][col] & south, "Node %d, %d should have 'south' set"  % (row-1, col)
                 pygame.draw.line(screen, grey, (off_x+2, off_y), (off_x+square_pixels-2, off_y), 2)
             if nodes[row][col] & west:
                 assert col > 0, "Can't draw west of col 0"
-                assert nodes[row][col-1] & east, "Node %d, %d should have 'east' set"  % (row, col)
+                assert nodes[row][col-1] & east, "Node %d, %d should have 'east' set"  % (row, col-1)
                 pygame.draw.line(screen, grey, (off_x, off_y+2), (off_x, off_y+square_pixels-2), 2)
 
     pygame.display.flip()
