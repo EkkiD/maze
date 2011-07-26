@@ -1,4 +1,25 @@
+import sys, pygame
+
+    pygame.init()
+
+    grid_size = grid_rows, grid_cols = 20, 25
+    square_pixels = 20
+    base_offset = 50
+
+    size = width, height = (2*base_offset)+(grid_cols*square_pixels), (2*base_offset)+(grid_rows*square_pixels)
+
+
+    black = 0,0,0
+    white = 255,255,255
+    grey  = 0x6E6D6Da
+    
+    north = 1
+    east = 2
+    south = 4
+    west = 8
+
 def main():
+    global nodes
     screen = pygame.display.set_mode(size)
     
     clock = pygame.time.Clock()
@@ -24,6 +45,7 @@ def main():
 
 def DoIteration(screen): 
     
+    global nodes
     #draw the outer border
     border_rect = (base_offset, base_offset, (grid_cols*square_pixels), (grid_rows*square_pixels))
     pygame.draw.rect(screen, grey, border_rect, 2)
@@ -47,25 +69,6 @@ def DoIteration(screen):
 
 
 if __name__ == "__main__":
-    import sys, pygame
-
-    pygame.init()
-
-    grid_size = grid_rows, grid_cols = 20, 25
-    square_pixels = 20
-    base_offset = 50
-
-    size = width, height = (2*base_offset)+(grid_cols*square_pixels), (2*base_offset)+(grid_rows*square_pixels)
-
-
-    black = 0,0,0
-    white = 255,255,255
-    grey  = 0x6E6D6Da
-    
-    north = 1
-    east = 2
-    south = 4
-    west = 8
 
     nodes = [None] * grid_rows
     for i in range(grid_rows):
