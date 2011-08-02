@@ -55,6 +55,7 @@ class maze:
 
         
         self.cellStack = deque()
+        self.cellStack.append((0,0))
 
 
     def run(self):
@@ -98,7 +99,7 @@ class maze:
             row = node[1]
             off_x = base_offset + col * square_pixels
             off_y = base_offset + row * square_pixels
-            rect = (off_x+2, off_y+2, off_x + square_pixels - 2, off_y + square_pixels - 2)
+            rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
             pygame.draw.rect(screen, green, rect)
 
     
@@ -112,16 +113,16 @@ class maze:
                 top = self.cellStack.pop()
                 row = top[0] 
                 col = top[1]
-                if (nodes[row][col] & self.north) and self.CheckCellForWalls(row-1, col):
+                if (self.nodes[row][col] & self.north) and self.CheckCellForWalls(row-1, col):
                     neighbors.append(self.north)
 
-                if (nodes[row][col] & self.south) and self.CheckCellForWalls(row+1, col):
+                if (self.nodes[row][col] & self.south) and self.CheckCellForWalls(row+1, col):
                     neighbors.append(self.south)
 
-                if (nodes[row][col] & self.west) and self.CheckCellForWalls(row, col-1):
+                if (self.nodes[row][col] & self.west) and self.CheckCellForWalls(row, col-1):
                     neighbors.append(self.west)
 
-                if (nodes[row][col] & self.east) and self.CheckCellForWalls(row, col+1):
+                if (self.nodes[row][col] & self.east) and self.CheckCellForWalls(row, col+1):
                     neighbors.append(self.east)
 
                 if(neighbors.__len__() == 0):
@@ -130,31 +131,31 @@ class maze:
                 index = randint(0,neighbors.__len__()-1)
                 direction = neighbors[index]
                 if(direction & self.north):
-                    assert nodes[row-1][col] & self.south, "Node %d, %d should have 'south' set"  % (row-1, col)
-                    nodes[row-1][col] ^ self.south
-                    nodes[row][col] ^ self.northa
+                    assert self.nodes[row-1][col] & self.south, "Node %d, %d should have 'south' set"  % (row-1, col)
+                    self.nodes[row-1][col] ^ self.south
+                    self.nodes[row][col] ^ self.north
                     new_loc = (row-1, col)
 
                 elif(direction & self.south):
-                    assert nodes[row+1][col] & self.north, "Node %d, %d should have 'north' set"  % (row+1, col)
-                    nodes[row+1][col] ^ self.north
-                    nodes[row][col] ^ self.south
+                    assert self.nodes[row+1][col] & self.north, "Node %d, %d should have 'north' set"  % (row+1, col)
+                    self.nodes[row+1][col] ^ self.north
+                    self.nodes[row][col] ^ self.south
                     new_loc = (row+1, col)
 
                 elif(direction & self.east):
-                    assert nodes[row][col+1] & self.west, "Node %d, %d should have 'east' set"  % (row, col+1)
-                    nodes[row][col+1] ^ self.west
-                    nodes[row][col] ^ self.east
+                    assert self.nodes[row][col+1] & self.west, "Node %d, %d should have 'east' set"  % (row, col+1)
+                    self.nodes[row][col+1] ^ self.west
+                    self.nodes[row][col] ^ self.east
                     new_loc = (row, col+1)
 
                 elif(direction & self.west):
-                    assert nodes[row][col-1] & self.east, "Node %d, %d should have 'south' set"  % (rows, col+1)
-                    nodes[row][col-1] ^ self.east
-                    nodes[row][col] ^ self.west
+                    assert self.nodes[row][col-1] & self.east, "Node %d, %d should have 'south' set"  % (rows, col+1)
+                    self.nodes[row][col-1] ^ self.east
+                    self.nodes[row][col] ^ self.west
                     new_loc = (row, col-1)
 
-                cellStack.push(top)
-                cellStack.push(new_loc)
+                self.cellStack.push(top)
+                self.cellStack.push(new_loc)
                 return
 
         except IndexError:
