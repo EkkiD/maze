@@ -151,66 +151,63 @@ class maze(object):
         rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
         pygame.draw.rect(screen, color, rect)
 
-
-
     def DFSGenerate(self):
         neighbors = []
         try:
-            while True:  
-                top = self.cellStack.pop()
-                row = top[0] 
-                col = top[1]
-                node = self.nodes[row][col]
-                if (node.IsStanding(north)) and self.nodes[row-1][col].AreAllWallsUp(row-1, col):
-                    neighbors.append(north)
+            top = self.cellStack.pop()
+            row = top[0] 
+            col = top[1]
+            node = self.nodes[row][col]
+            if (node.IsStanding(north)) and self.nodes[row-1][col].AreAllWallsUp(row-1, col):
+                neighbors.append(north)
 
-                if (node.IsStanding(south)) and self.nodes[row+1][col].AreAllWallsUp(row+1, col):
-                    neighbors.append(south)
+            if (node.IsStanding(south)) and self.nodes[row+1][col].AreAllWallsUp(row+1, col):
+                neighbors.append(south)
 
-                if (node.IsStanding(west)) and self.nodes[row][col-1].AreAllWallsUp(row, col-1):
-                    neighbors.append(west)
+            if (node.IsStanding(west)) and self.nodes[row][col-1].AreAllWallsUp(row, col-1):
+                neighbors.append(west)
 
-                if (node.IsStanding(east)) and self.nodes[row][col+1].AreAllWallsUp(row, col+1):
-                    neighbors.append(east)
+            if (node.IsStanding(east)) and self.nodes[row][col+1].AreAllWallsUp(row, col+1):
+                neighbors.append(east)
 
-                if(neighbors.__len__() == 0):
-                    continue
-
-                index = random.randint(0,neighbors.__len__()-1)
-                direction = neighbors[index]
-
-                if(direction & north):
-                    assert self.nodes[row-1][col].IsStanding(south), \
-                                    "Node %d, %d should have 'south' set"  % (row-1, col)
-                    self.nodes[row-1][col].TearDown(south)
-                    node.TearDown(north)
-                    new_loc = (row-1, col)
-
-                elif(direction & south):
-                    assert self.nodes[row+1][col].IsStanding(north), \
-                                    "Node %d, %d should have 'north' set"  % (row+1, col)
-                    self.nodes[row+1][col].TearDown(north)
-                    node.TearDown(south)
-                    new_loc = (row+1, col)
-
-                elif(direction & east):
-                    assert self.nodes[row][col+1].IsStanding(west), \
-                                    "Node %d, %d should have 'east' set"  % (row, col+1)
-                    self.nodes[row][col+1].TearDown(west)
-                    node.TearDown(east)
-                    new_loc = (row, col+1)
-
-                elif(direction & west):
-                    assert self.nodes[row][col-1].IsStanding(east), \
-                                    "Node %d, %d should have 'south' set"  % (rows, col+1)
-                    self.nodes[row][col-1].TearDown(east)
-                    node.TearDown(west)
-                    new_loc = (row, col-1)
-
-                node.visited = True
-                self.cellStack.append(top)
-                self.cellStack.append(new_loc)
+            if(neighbors.__len__() == 0):
                 return
+
+            index = random.randint(0,neighbors.__len__()-1)
+            direction = neighbors[index]
+
+            if(direction & north):
+                assert self.nodes[row-1][col].IsStanding(south), \
+                                "Node %d, %d should have 'south' set"  % (row-1, col)
+                self.nodes[row-1][col].TearDown(south)
+                node.TearDown(north)
+                new_loc = (row-1, col)
+
+            elif(direction & south):
+                assert self.nodes[row+1][col].IsStanding(north), \
+                                "Node %d, %d should have 'north' set"  % (row+1, col)
+                self.nodes[row+1][col].TearDown(north)
+                node.TearDown(south)
+                new_loc = (row+1, col)
+
+            elif(direction & east):
+                assert self.nodes[row][col+1].IsStanding(west), \
+                                "Node %d, %d should have 'east' set"  % (row, col+1)
+                self.nodes[row][col+1].TearDown(west)
+                node.TearDown(east)
+                new_loc = (row, col+1)
+
+            elif(direction & west):
+                assert self.nodes[row][col-1].IsStanding(east), \
+                                "Node %d, %d should have 'south' set"  % (rows, col+1)
+                self.nodes[row][col-1].TearDown(east)
+                node.TearDown(west)
+                new_loc = (row, col-1)
+
+            node.visited = True
+            self.cellStack.append(top)
+            self.cellStack.append(new_loc)
+            return
 
         except IndexError, e:
             return
