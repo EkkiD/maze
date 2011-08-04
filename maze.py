@@ -57,13 +57,13 @@ class node(object):
                 return False
 
 
-        if ((row != 0) and not(self.IsStanding(west))):
+        if ((row != 0) and not(self.IsStanding(north))):
             return False
-        if ((row != grid_rows-1) and not(self.IsStanding(east))):
+        if ((row != grid_rows-1) and not(self.IsStanding(south))):
             return False
-        if ((col != 0) and not(self.IsStanding(north) )):
+        if ((col != 0) and not(self.IsStanding(west) )):
             return False
-        if ((col != grid_cols-1) and not(self.IsStanding(south))):
+        if ((col != grid_cols-1) and not(self.IsStanding(east))):
             return False
 
         return True
@@ -97,10 +97,10 @@ class maze(object):
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
-                if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_RIGHT:
-                        self.DoIteration();
-    
+                #if event.type == pygame.KEYUP:
+                   # if event.key == pygame.K_RIGHT:
+            self.DoIteration();
+
             screen.fill(black)
             self.DrawScreen(screen)
             clock.tick(40)
@@ -133,16 +133,19 @@ class maze(object):
 
                 if self.nodes[row][col].visited:
                     rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
-                    pygame.draw.rect(screen, grey, rect)
-
-        for node in self.cellStack:
-            col = node[0]
-            row = node[1]
+                    #pygame.draw.rect(screen, grey, rect)
+        try:
+            node = self.cellStack.pop()
+            row = node[0]
+            col = node[1]
             off_x = base_offset + col * square_pixels
             off_y = base_offset + row * square_pixels
             rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
             pygame.draw.rect(screen, green, rect)
-    
+            self.cellStack.append(node)
+        except IndexError:
+            pygame.display.flip()
+
         pygame.display.flip()
 
 
@@ -169,43 +172,43 @@ class maze(object):
                 if(neighbors.__len__() == 0):
                     continue
 
-                index = randint(0,neighbors.__len__()-1)
+                index = random.randint(0,neighbors.__len__()-1)
                 direction = neighbors[index]
 
                 if(direction & north):
                     assert self.nodes[row-1][col].IsStanding(south), \
                                     "Node %d, %d should have 'south' set"  % (row-1, col)
                     self.nodes[row-1][col].TearDown(south)
-                    node.IsStanding(north)
+                    node.TearDown(north)
                     new_loc = (row-1, col)
 
                 elif(direction & south):
                     assert self.nodes[row+1][col].IsStanding(north), \
                                     "Node %d, %d should have 'north' set"  % (row+1, col)
-                    self.nodes[row+1][col].IsStanding(north)
-                    node.IsStanding(south)
+                    self.nodes[row+1][col].TearDown(north)
+                    node.TearDown(south)
                     new_loc = (row+1, col)
 
                 elif(direction & east):
                     assert self.nodes[row][col+1].IsStanding(west), \
                                     "Node %d, %d should have 'east' set"  % (row, col+1)
-                    self.nodes[row][col+1].IsStanding(west)
-                    node.IsStanding(east)
+                    self.nodes[row][col+1].TearDown(west)
+                    node.TearDown(east)
                     new_loc = (row, col+1)
 
                 elif(direction & west):
                     assert self.nodes[row][col-1].IsStanding(east), \
                                     "Node %d, %d should have 'south' set"  % (rows, col+1)
-                    self.nodes[row][col-1].IsStanding(east)
-                    node.IsStanding(west)
+                    self.nodes[row][col-1].TearDown(east)
+                    node.TearDown(west)
                     new_loc = (row, col-1)
 
                 node.visited = True
-                self.cellStack.push(top)
-                self.cellStack.push(new_loc)
+                self.cellStack.append(top)
+                self.cellStack.append(new_loc)
                 return
 
-        except IndexError:
+        except IndexError, e:
             return
             
 
