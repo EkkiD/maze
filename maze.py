@@ -14,6 +14,7 @@ black = 0,0,0
 white = 255,255,255
 grey  = 0x6E6D6Da
 green = 0x008000
+dark  = 0x302226
     
 north = 1
 east = 2
@@ -131,22 +132,25 @@ class maze(object):
                     assert self.nodes[row][col-1].IsStanding(east), "Node %d, %d should have 'east' set"  % (row, col-1)
                     pygame.draw.line(screen, white, (off_x, off_y+2), (off_x, off_y+square_pixels-2), 2)
 
-                if self.nodes[row][col].visited:
-                    rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
-                    #pygame.draw.rect(screen, grey, rect)
         try:
+            for node in self.cellStack:
+                self.FillSquare(node, dark)
             node = self.cellStack.pop()
-            row = node[0]
-            col = node[1]
-            off_x = base_offset + col * square_pixels
-            off_y = base_offset + row * square_pixels
-            rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
-            pygame.draw.rect(screen, green, rect)
+            self.FillSquare(node, green)
             self.cellStack.append(node)
         except IndexError:
             pygame.display.flip()
 
         pygame.display.flip()
+
+    def FillSquare(self, node, color):
+        row = node[0]
+        col = node[1]
+        off_x = base_offset + col * square_pixels
+        off_y = base_offset + row * square_pixels
+        rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
+        pygame.draw.rect(screen, color, rect)
+
 
 
     def DFSGenerate(self):
