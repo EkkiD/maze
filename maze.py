@@ -21,6 +21,11 @@ east = 2
 south = 4
 west = 8
 
+untouched = 0
+visited = 1
+stacked = 2
+current = 3
+
    
 screen = pygame.display.set_mode(size)
 
@@ -38,6 +43,7 @@ class node(object):
         if row == 0:               self.walls = self.walls ^ north
         if row == grid_rows - 1:   self.walls = self.walls ^ south
         self.visited = False
+        self.stacked = False
 
     def TearDown(self, wall):
         self.walls = self.walls ^ wall
@@ -116,25 +122,27 @@ class maze(object):
         border_rect = (base_offset, base_offset, (grid_cols*square_pixels), (grid_rows*square_pixels))
         pygame.draw.rect(screen, grey, border_rect, 2)
     
-    
         for row in range(grid_rows):
             for col in range(grid_cols):
                 off_x = base_offset + col * square_pixels
                 off_y = base_offset + row * square_pixels
 
-                if self.nodes[row][col].IsStanding(north):
+                node = self.nodes[row][col]
+                
+                if node.IsStanding(north):
                     assert row > 0, "Can't draw north of row 0"
                     assert self.nodes[row-1][col].IsStanding(south), "Node %d, %d should have 'south' set"  % (row-1, col)
                     pygame.draw.line(screen, white, (off_x+2, off_y), (off_x+square_pixels-2, off_y), 2)
 
-                if self.nodes[row][col].IsStanding(west):
+                if node.IsStanding(west):
                     assert col > 0, "Can't draw west of col 0"
                     assert self.nodes[row][col-1].IsStanding(east), "Node %d, %d should have 'east' set"  % (row, col-1)
                     pygame.draw.line(screen, white, (off_x, off_y+2), (off_x, off_y+square_pixels-2), 2)
 
+                if node.stacked:
+                    self.FillSquare((row, col), dark)
+
         try:
-            for node in self.cellStack:
-                self.FillSquare(node, dark)
             node = self.cellStack.pop()
             self.FillSquare(node, green)
             self.cellStack.append(node)
@@ -143,9 +151,9 @@ class maze(object):
 
         pygame.display.flip()
 
-    def FillSquare(self, node, color):
-        row = node[0]
-        col = node[1]
+    def FillSquare(self, loc, color):
+        row = loc[0]
+        col = loc[1]
         off_x = base_offset + col * square_pixels
         off_y = base_offset + row * square_pixels
         rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
@@ -158,6 +166,7 @@ class maze(object):
             row = top[0] 
             col = top[1]
             node = self.nodes[row][col]
+            node.stacked = False
             if (node.IsStanding(north)) and self.nodes[row-1][col].AreAllWallsUp(row-1, col):
                 neighbors.append(north)
 
@@ -206,6 +215,7 @@ class maze(object):
 
             node.visited = True
             self.cellStack.append(top)
+            node.stacked = True
             self.cellStack.append(new_loc)
             return
 
