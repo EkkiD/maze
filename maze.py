@@ -35,6 +35,15 @@ clock = pygame.time.Clock()
 
 render_steps = True
 
+def toggleRender():
+    global render_steps
+    if render_steps == True:
+        render_steps = False
+    else:
+        render_steps = True
+    return
+
+
 class node(object):
     """ Stores data regarding the self.nodes:
             - which walls are up
@@ -116,19 +125,17 @@ class maze(object):
                     elif event.key == pygame.K_s:
                         #TODO: implement solve
                         self.runAlgorithm(self.DFSSolve)
+                    elif event.key == pygame.K_t:
+                        toggleRender()
 
             font = pygame.font.Font(None, 18)
-            text = font.render("d-DFS Generate      p-Prim's Generate     c-Clear     s-Solve", 1, white)
+            text = font.render("d-DFS Generate      r-Recursive DFS      p-Prim's Generate     c-Clear     s-Solve   t-Toggle Render", 1, white)
             textpos = text.get_rect()
             textpos.bottom = screen.get_rect().bottom - base_offset/2
             textpos.centerx = screen.get_rect().centerx
             screen.blit(text, textpos)
         
             pygame.display.flip()
-
-    def checkQuit(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit()
 
     def randomLoc(self):
         row = random.randint(0,grid_rows-1)
@@ -137,6 +144,12 @@ class maze(object):
         return
 
     def clearMaze(self):
+        self.cellStack.clear()
+        #reinitialize all of the nodes
+        for i in range(grid_rows):
+            for j in range(grid_cols):
+                self.nodes[i][j] = node(i, j)
+        self.DrawScreen()
         return
 
     def clearStatus(self):
@@ -303,7 +316,8 @@ class maze(object):
                     top = self.cellStack.pop()
                     self.nodes[top[0]][top[1]].status = current
                     self.cellStack.append(top)
-                    self.DrawScreen();
+                    if render_steps:
+                        self.DrawScreen();
                     continue 
     
                 index = random.randint(0,neighbors.__len__()-1)
@@ -326,7 +340,8 @@ class maze(object):
                 self.cellStack.append(new_loc)
                 self.nodes[new_loc[0]][new_loc[1]].status = current
                  
-                self.DrawScreen()
+                if render_steps:
+                    self.DrawScreen()
             except IndexError, e:
                 # Once the stack is empty, we are done.
                 break
