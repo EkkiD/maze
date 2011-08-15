@@ -15,6 +15,8 @@ white = 255,255,255
 grey  = 0x6E6D6Da
 green = 0x008000
 dark  = 0x302226
+brightgreen = 0x00ff00
+red = 0xff0000
     
 north = 1
 east = 2
@@ -30,6 +32,8 @@ current = 3
 screen = pygame.display.set_mode(size)
 
 clock = pygame.time.Clock()
+
+render_steps = True
 
 class node(object):
     """ Stores data regarding the self.nodes:
@@ -56,8 +60,6 @@ class node(object):
     def AreAllWallsUp(self, row, col):
         """ Return true if the node has all Walls up, 
             false otherwise """
-        return self.status == untouched
-
         if  ((row < 0) or (row >= grid_rows)):
                 return False
         if ((col < 0) and (col >= grid_col)):
@@ -93,6 +95,8 @@ class maze(object):
                 self.nodes[i][j] = node(i, j)
         
         self.cellStack = deque()
+        self.solve_start = (0,0)
+        self.solve_end  = (grid_rows-1,grid_cols-1)
 
     def run(self):
         while 1:
@@ -100,7 +104,7 @@ class maze(object):
                 if event.type == pygame.QUIT: sys.exit()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_c:
-                        clearMaze() 
+                        self.clearMaze() 
                     if event.key == pygame.K_d:
                         self.runAlgorithm(self.DFSGenerate)
                     elif event.key == pygame.K_p:
@@ -143,7 +147,10 @@ class maze(object):
 
     def runAlgorithm(self, algorithm):
         #start at a random location
-        self.randomLoc()
+        if algorithm == self.DFSSolve:
+            self.cellStack.append(self.solve_start)
+        else:
+            self.randomLoc()
         algorithm()
         self.DrawScreen()
         self.clearStatus()
@@ -181,6 +188,12 @@ class maze(object):
                 if node.status == current:
                     self.FillSquare((row, col), green)
 
+                if (row, col) == self.solve_start:
+                    self.FillSquare((row, col), brightgreen)
+
+                if (row, col) == self.solve_end:
+                    self.FillSquare((row, col), red)
+
         pygame.display.flip()
         clock.tick(40)
 
@@ -217,7 +230,8 @@ class maze(object):
                     top = self.cellStack.pop()
                     self.nodes[top[0]][top[1]].status = current
                     self.cellStack.append(top)
-                    self.DrawScreen();
+                    if render_steps:
+                        self.DrawScreen()
                     continue 
     
                 index = random.randint(0,neighbors.__len__()-1)
@@ -255,14 +269,67 @@ class maze(object):
                 self.cellStack.append(top)
                 self.cellStack.append(new_loc)
                 self.nodes[new_loc[0]][new_loc[1]].status = current
-    
-                self.DrawScreen()
+                if render_steps: 
+                    self.DrawScreen()
             except IndexError, e:
                 # Once the stack is empty, we are done.
                 break
         return  
 
     def DFSSolve(self):
+        while True:
+            try:
+                top = self.cellStack.pop()
+                if top == self.solve_end:
+                    return
+                row = top[0] 
+                col = top[1]
+                node = self.nodes[row][col]
+                node.status = visited
+                neighbors = []
+                if  (row > 0) and (not node.IsStanding(north)) and self.nodes[row-1][col].status == untouched:
+                    neighbors.append(north)
+    
+                if  (row < grid_rows-1) and (not node.IsStanding(south)) and self.nodes[row+1][col].status == untouched:
+                    neighbors.append(south)
+    
+                if (col > 0) and (not node.IsStanding(west)) and self.nodes[row][col-1].status == untouched:
+                    neighbors.append(west)
+    
+                if (col < grid_cols-1) and (not node.IsStanding(east)) and self.nodes[row][col+1].status == untouched:
+                    neighbors.append(east)
+    
+                if(neighbors.__len__() == 0):
+                    top = self.cellStack.pop()
+                    self.nodes[top[0]][top[1]].status = current
+                    self.cellStack.append(top)
+                    self.DrawScreen();
+                    continue 
+    
+                index = random.randint(0,neighbors.__len__()-1)
+                direction = neighbors[index]
+    
+                if(direction & north):
+                    new_loc = (row-1, col)
+    
+                elif(direction & south):
+                    new_loc = (row+1, col)
+    
+                elif(direction & east):
+                    new_loc = (row, col+1)
+    
+                elif(direction & west):
+                    new_loc = (row, col-1)
+    
+                node.status = stacked
+                self.cellStack.append(top)
+                self.cellStack.append(new_loc)
+                self.nodes[new_loc[0]][new_loc[1]].status = current
+                 
+                self.DrawScreen()
+            except IndexError, e:
+                # Once the stack is empty, we are done.
+                break
         return
         
 
