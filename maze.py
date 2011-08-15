@@ -42,8 +42,7 @@ class node(object):
         if col == grid_cols - 1:   self.walls = self.walls ^ east
         if row == 0:               self.walls = self.walls ^ north
         if row == grid_rows - 1:   self.walls = self.walls ^ south
-        self.visited = False
-        self.stacked = False
+        self.status = 0
 
     def TearDown(self, wall):
         self.walls = self.walls ^ wall
@@ -57,12 +56,12 @@ class node(object):
     def AreAllWallsUp(self, row, col):
         """ Return true if the node has all Walls up, 
             false otherwise """
+        return self.status == untouched
 
         if  ((row < 0) or (row >= grid_rows)):
                 return False
         if ((col < 0) and (col >= grid_col)):
                 return False
-
 
         if ((row != 0) and not(self.IsStanding(north))):
             return False
@@ -74,8 +73,6 @@ class node(object):
             return False
 
         return True
-
-
     
 
 class maze(object):
@@ -94,30 +91,69 @@ class maze(object):
         for i in range(grid_rows):
             for j in range(grid_cols):
                 self.nodes[i][j] = node(i, j)
-
         
         self.cellStack = deque()
-        self.cellStack.append((0,0))
-
 
     def run(self):
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
-                #if event.type == pygame.KEYUP:
-                   # if event.key == pygame.K_RIGHT:
-            self.DoIteration();
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_c:
+                        clearMaze() 
+                    if event.key == pygame.K_d:
+                        self.runAlgorithm(self.DFSGenerate)
+                    elif event.key == pygame.K_p:
+                        #TODO: Implement Prim's method
+                        self.runAlgorithm(self.DFSGenerate)
+                    elif event.key == pygame.K_r:
+                        self.runAlgorithm(self.DFSGenerate)
+                        #TODO: implement DFS recursive
+                    elif event.key == pygame.K_s:
+                        #TODO: implement solve
+                        self.runAlgorithm(self.DFSSolve)
 
-            screen.fill(black)
-            self.DrawScreen(screen)
-            clock.tick(40)
-            
-    def DoIteration(self):
-        self.DFSGenerate()     
-    
-    
-    def DrawScreen(self, screen): 
+            font = pygame.font.Font(None, 18)
+            text = font.render("d-DFS Generate      p-Prim's Generate     c-Clear     s-Solve", 1, white)
+            textpos = text.get_rect()
+            textpos.bottom = screen.get_rect().bottom - base_offset/2
+            textpos.centerx = screen.get_rect().centerx
+            screen.blit(text, textpos)
         
+            pygame.display.flip()
+
+    def checkQuit(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
+
+    def randomLoc(self):
+        row = random.randint(0,grid_rows-1)
+        col = random.randint(0,grid_cols-1)
+        self.cellStack.append((row, col))
+        return
+
+    def clearMaze(self):
+        return
+
+    def clearStatus(self):
+        for row  in self.nodes:
+            for node in row:
+                node.status = untouched
+        return
+
+    def runAlgorithm(self, algorithm):
+        #start at a random location
+        self.randomLoc()
+        algorithm()
+        self.DrawScreen()
+        self.clearStatus()
+        return
+
+    def DrawScreen(self): 
+        screen.fill(black)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
+
         #draw the outer border
         border_rect = (base_offset, base_offset, (grid_cols*square_pixels), (grid_rows*square_pixels))
         pygame.draw.rect(screen, grey, border_rect, 2)
@@ -139,17 +175,14 @@ class maze(object):
                     assert self.nodes[row][col-1].IsStanding(east), "Node %d, %d should have 'east' set"  % (row, col-1)
                     pygame.draw.line(screen, white, (off_x, off_y+2), (off_x, off_y+square_pixels-2), 2)
 
-                if node.stacked:
+                if node.status == stacked:
                     self.FillSquare((row, col), dark)
 
-        try:
-            node = self.cellStack.pop()
-            self.FillSquare(node, green)
-            self.cellStack.append(node)
-        except IndexError:
-            pygame.display.flip()
+                if node.status == current:
+                    self.FillSquare((row, col), green)
 
         pygame.display.flip()
+        clock.tick(40)
 
     def FillSquare(self, loc, color):
         row = loc[0]
@@ -160,69 +193,78 @@ class maze(object):
         pygame.draw.rect(screen, color, rect)
 
     def DFSGenerate(self):
-        neighbors = []
-        try:
-            top = self.cellStack.pop()
-            row = top[0] 
-            col = top[1]
-            node = self.nodes[row][col]
-            node.stacked = False
-            if (node.IsStanding(north)) and self.nodes[row-1][col].AreAllWallsUp(row-1, col):
-                neighbors.append(north)
+        while True:
+            try:
+                top = self.cellStack.pop()
+                row = top[0] 
+                col = top[1]
+                node = self.nodes[row][col]
+                node.status = visited
+                neighbors = []
+                if (node.IsStanding(north)) and self.nodes[row-1][col].AreAllWallsUp(row-1, col):
+                    neighbors.append(north)
+    
+                if (node.IsStanding(south)) and self.nodes[row+1][col].AreAllWallsUp(row+1, col):
+                    neighbors.append(south)
+    
+                if (node.IsStanding(west)) and self.nodes[row][col-1].AreAllWallsUp(row, col-1):
+                    neighbors.append(west)
+    
+                if (node.IsStanding(east)) and self.nodes[row][col+1].AreAllWallsUp(row, col+1):
+                    neighbors.append(east)
+    
+                if(neighbors.__len__() == 0):
+                    top = self.cellStack.pop()
+                    self.nodes[top[0]][top[1]].status = current
+                    self.cellStack.append(top)
+                    self.DrawScreen();
+                    continue 
+    
+                index = random.randint(0,neighbors.__len__()-1)
+                direction = neighbors[index]
+    
+                if(direction & north):
+                    assert self.nodes[row-1][col].IsStanding(south), \
+                                    "Node %d, %d should have 'south' set"  % (row-1, col)
+                    self.nodes[row-1][col].TearDown(south)
+                    node.TearDown(north)
+                    new_loc = (row-1, col)
+    
+                elif(direction & south):
+                    assert self.nodes[row+1][col].IsStanding(north), \
+                                    "Node %d, %d should have 'north' set"  % (row+1, col)
+                    self.nodes[row+1][col].TearDown(north)
+                    node.TearDown(south)
+                    new_loc = (row+1, col)
+    
+                elif(direction & east):
+                    assert self.nodes[row][col+1].IsStanding(west), \
+                                    "Node %d, %d should have 'east' set"  % (row, col+1)
+                    self.nodes[row][col+1].TearDown(west)
+                    node.TearDown(east)
+                    new_loc = (row, col+1)
+    
+                elif(direction & west):
+                    assert self.nodes[row][col-1].IsStanding(east), \
+                                    "Node %d, %d should have 'south' set"  % (row, col+1)
+                    self.nodes[row][col-1].TearDown(east)
+                    node.TearDown(west)
+                    new_loc = (row, col-1)
+    
+                node.status = stacked
+                self.cellStack.append(top)
+                self.cellStack.append(new_loc)
+                self.nodes[new_loc[0]][new_loc[1]].status = current
+    
+                self.DrawScreen()
+            except IndexError, e:
+                # Once the stack is empty, we are done.
+                break
+        return  
 
-            if (node.IsStanding(south)) and self.nodes[row+1][col].AreAllWallsUp(row+1, col):
-                neighbors.append(south)
-
-            if (node.IsStanding(west)) and self.nodes[row][col-1].AreAllWallsUp(row, col-1):
-                neighbors.append(west)
-
-            if (node.IsStanding(east)) and self.nodes[row][col+1].AreAllWallsUp(row, col+1):
-                neighbors.append(east)
-
-            if(neighbors.__len__() == 0):
-                return
-
-            index = random.randint(0,neighbors.__len__()-1)
-            direction = neighbors[index]
-
-            if(direction & north):
-                assert self.nodes[row-1][col].IsStanding(south), \
-                                "Node %d, %d should have 'south' set"  % (row-1, col)
-                self.nodes[row-1][col].TearDown(south)
-                node.TearDown(north)
-                new_loc = (row-1, col)
-
-            elif(direction & south):
-                assert self.nodes[row+1][col].IsStanding(north), \
-                                "Node %d, %d should have 'north' set"  % (row+1, col)
-                self.nodes[row+1][col].TearDown(north)
-                node.TearDown(south)
-                new_loc = (row+1, col)
-
-            elif(direction & east):
-                assert self.nodes[row][col+1].IsStanding(west), \
-                                "Node %d, %d should have 'east' set"  % (row, col+1)
-                self.nodes[row][col+1].TearDown(west)
-                node.TearDown(east)
-                new_loc = (row, col+1)
-
-            elif(direction & west):
-                assert self.nodes[row][col-1].IsStanding(east), \
-                                "Node %d, %d should have 'south' set"  % (rows, col+1)
-                self.nodes[row][col-1].TearDown(east)
-                node.TearDown(west)
-                new_loc = (row, col-1)
-
-            node.visited = True
-            self.cellStack.append(top)
-            node.stacked = True
-            self.cellStack.append(new_loc)
-            return
-
-        except IndexError, e:
-            return
-            
-
+    def DFSSolve(self):
+        return
+        
 
 
 
