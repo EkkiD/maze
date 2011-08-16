@@ -108,6 +108,7 @@ class maze(object):
         self.solve_end  = (grid_rows-1,grid_cols-1)
 
     def run(self):
+        self.DrawScreen()
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
@@ -120,8 +121,7 @@ class maze(object):
                         #TODO: Implement Prim's method
                         self.runAlgorithm(self.DFSGenerate)
                     elif event.key == pygame.K_r:
-                        self.runAlgorithm(self.DFSGenerate)
-                        #TODO: implement DFS recursive
+                        self.runAlgorithm(self.DFSRecursive)
                     elif event.key == pygame.K_s:
                         #TODO: implement solve
                         self.runAlgorithm(self.DFSSolve)
@@ -140,8 +140,7 @@ class maze(object):
     def randomLoc(self):
         row = random.randint(0,grid_rows-1)
         col = random.randint(0,grid_cols-1)
-        self.cellStack.append((row, col))
-        return
+        return (row, col)
 
     def clearMaze(self):
         self.cellStack.clear()
@@ -160,11 +159,12 @@ class maze(object):
 
     def runAlgorithm(self, algorithm):
         #start at a random location
+        start_loc = (0,0)
         if algorithm == self.DFSSolve:
-            self.cellStack.append(self.solve_start)
+            start_loc = self.solve_start
         else:
-            self.randomLoc()
-        algorithm()
+            start_loc =  self.randomLoc()
+        algorithm(start_loc)
         self.DrawScreen()
         self.clearStatus()
         return
@@ -218,7 +218,8 @@ class maze(object):
         rect = (off_x+4, off_y+4,  square_pixels - 6, square_pixels - 6)
         pygame.draw.rect(screen, color, rect)
 
-    def DFSGenerate(self):
+    def DFSGenerate(self, loc):
+        self.cellStack.append((loc[0], loc[1]))
         while True:
             try:
                 top = self.cellStack.pop()
@@ -273,7 +274,7 @@ class maze(object):
     
                 elif(direction & west):
                     assert self.nodes[row][col-1].IsStanding(east), \
-                                    "Node %d, %d should have 'south' set"  % (row, col+1)
+                                    "node %d, %d should have 'south' set"  % (row, col+1)
                     self.nodes[row][col-1].TearDown(east)
                     node.TearDown(west)
                     new_loc = (row, col-1)
@@ -289,7 +290,8 @@ class maze(object):
                 break
         return  
 
-    def DFSSolve(self):
+    def DFSSolve(self, loc):
+        self.cellStack.append((loc[0], loc[1]))
         while True:
             try:
                 top = self.cellStack.pop()
@@ -346,8 +348,57 @@ class maze(object):
                 # Once the stack is empty, we are done.
                 break
         return
-        
 
+    def DFSRecursive(self, loc):
+        row = loc[0]
+        col = loc[1]
+        node = self.nodes[row][col]
+
+        node.status = current
+        if render_steps:
+            self.DrawScreen()
+
+        neighbors = [north, south, east, west]
+        random.shuffle(neighbors)
+
+        for direction in neighbors:
+
+            if (direction & north) and (node.IsStanding(north)) and self.nodes[row-1][col].AreAllWallsUp(row-1, col):
+                assert self.nodes[row-1][col].IsStanding(south), \
+                                "Node %d, %d should have 'south' set"  % (row-1, col)
+                self.nodes[row-1][col].TearDown(south)
+                node.TearDown(north)
+                node.status = stacked
+                self.DFSRecursive((row-1, col))
+
+            elif(direction & south) and (node.IsStanding(south)) and self.nodes[row+1][col].AreAllWallsUp(row+1, col):
+                assert self.nodes[row+1][col].IsStanding(north), \
+                                "Node %d, %d should have 'north' set"  % (row+1, col)
+                self.nodes[row+1][col].TearDown(north)
+                node.TearDown(south)
+                node.status = stacked
+                self.DFSRecursive((row+1, col))
+
+            elif(direction & east) and (node.IsStanding(east)) and self.nodes[row][col+1].AreAllWallsUp(row, col+1):
+                assert self.nodes[row][col+1].IsStanding(west), \
+                                "Node %d, %d should have 'east' set"  % (row, col+1)
+                self.nodes[row][col+1].TearDown(west)
+                node.TearDown(east)
+                node.status = stacked
+                self.DFSRecursive((row, col+1))
+        
+            elif(direction & west) and (node.IsStanding(west)) and self.nodes[row][col-1].AreAllWallsUp(row, col-1):
+                assert self.nodes[row][col-1].IsStanding(east), \
+                                "Node %d, %d should have 'south' set"  % (row, col+1)
+                self.nodes[row][col-1].TearDown(east)
+                node.TearDown(west)
+                node.status = stacked
+                self.DFSRecursive((row, col-1))
+
+        node.status = current
+        if render_steps:
+            self.DrawScreen()
+        node.status = visited
 
 
 if __name__ == "__main__":
