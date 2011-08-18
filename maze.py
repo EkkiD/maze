@@ -118,11 +118,10 @@ class maze(object):
                         self.runAlgorithm(self.DFSGenerate)
                     elif event.key == pygame.K_p:
                         #TODO: Implement Prim's method
-                        self.runAlgorithm(self.DFSGenerate)
+                        self.runAlgorithm(self.PrimGenerate)
                     elif event.key == pygame.K_r:
                         self.runAlgorithm(self.DFSRecursive)
                     elif event.key == pygame.K_s:
-                        #TODO: implement solve
                         self.runAlgorithm(self.DFSSolve)
                     elif event.key == pygame.K_t:
                         toggleRender()
@@ -414,7 +413,93 @@ class maze(object):
             self.DrawScreen()
         node.status = visited
 
+    def PrimGenerate(self, loc):
+        edge_list = []
+        cur_loc = loc
 
+        while True:
+            row = cur_loc[0]
+            col = cur_loc[1]
+            node = self.nodes[row][col]
+
+            #for rendering purposed only
+            added_edges = False
+
+            if  (row > 0) and self.nodes[row-1][col].status == untouched:
+                edge_list.append(((row, col), (row-1, col)))
+                added_edges = True
+
+            if  (row < grid_rows-1) and self.nodes[row+1][col].status == untouched:
+                edge_list.append(((row, col), (row+1, col)))
+                added_edges = True
+
+            if (col > 0) and self.nodes[row][col-1].status == untouched:
+                edge_list.append(((row, col), (row, col-1)))
+                added_edges = True
+
+            if (col < grid_cols-1) and self.nodes[row][col+1].status == untouched:
+                edge_list.append(((row, col), (row, col+1)))
+                added_edges = True
+            
+            #once we process the node it's not longer current
+            if added_edges:
+                node.status = stacked
+            else:
+                node.status = visited
+
+            cur_edge = None
+
+            while True:
+                if edge_list.__len__() == 1:
+                    index = 0
+                else:
+                    index = random.randint(0,edge_list.__len__()-1)
+                cur_edge = edge_list.pop(index)
+                #No longer in the active nodes 
+                self.nodes[cur_edge[0][0]][cur_edge[0][1]].status = visited
+
+                if (self.nodes[cur_edge[1][0]][cur_edge[1][1]].status == untouched) or (edge_list.__len__() == 0):
+                    break
+
+
+            # IF we run out of edges we are done!
+            if edge_list.__len__() == 0:
+                return
+
+            #Southern edge of a node
+            pre_node = self.nodes[cur_edge[0][0]][cur_edge[0][1]]
+            next_node = self.nodes[cur_edge[1][0]][cur_edge[1][1]]
+            if (cur_edge[1][0] < cur_edge[0][0]):
+                assert pre_node.IsStanding(north)
+                assert next_node.IsStanding(south)
+                pre_node.TearDown(north)
+                next_node.TearDown(south)
+            if (cur_edge[1][0] > cur_edge[0][0]):
+                assert pre_node.IsStanding(south)
+                assert next_node.IsStanding(north)
+                pre_node.TearDown(south)
+                next_node.TearDown(north)
+            if (cur_edge[1][1] > cur_edge[0][1]):
+                assert pre_node.IsStanding(east)
+                assert next_node.IsStanding(west)
+                pre_node.TearDown(east)
+                next_node.TearDown(west)
+            if (cur_edge[1][1] < cur_edge[0][1]):
+                assert pre_node.IsStanding(west)
+                assert next_node.IsStanding(east)
+                pre_node.TearDown(west)
+                next_node.TearDown(east)
+
+            next_node.status = current
+            cur_loc = cur_edge[1]
+            
+            self.DrawScreen()
+
+
+            
+
+
+        
 if __name__ == "__main__":
     myMaze = maze()
     myMaze.run()
