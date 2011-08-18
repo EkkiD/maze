@@ -492,11 +492,10 @@ class maze(object):
 
             next_node.status = current
             cur_loc = cur_edge[1]
-            
-            self.DrawScreen()
+           
+            if render_steps:
+                self.DrawScreen()
 
-
-            
 
 
         
