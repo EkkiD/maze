@@ -108,7 +108,6 @@ class maze(object):
         self.solve_end  = (grid_rows-1,grid_cols-1)
 
     def run(self):
-        self.DrawScreen()
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
@@ -128,14 +127,8 @@ class maze(object):
                     elif event.key == pygame.K_t:
                         toggleRender()
 
-            font = pygame.font.Font(None, 18)
-            text = font.render("d-DFS Generate      r-Recursive DFS      p-Prim's Generate     c-Clear     s-Solve   t-Toggle Render", 1, white)
-            textpos = text.get_rect()
-            textpos.bottom = screen.get_rect().bottom - base_offset/2
-            textpos.centerx = screen.get_rect().centerx
-            screen.blit(text, textpos)
-        
-            pygame.display.flip()
+            
+            self.DrawScreen()
 
     def randomLoc(self):
         row = random.randint(0,grid_rows-1)
@@ -158,6 +151,7 @@ class maze(object):
         return
 
     def runAlgorithm(self, algorithm):
+        self.clearStatus()
         #start at a random location
         start_loc = (0,0)
         if algorithm == self.DFSSolve:
@@ -166,7 +160,6 @@ class maze(object):
             start_loc =  self.randomLoc()
         algorithm(start_loc)
         self.DrawScreen()
-        self.clearStatus()
         return
 
     def DrawScreen(self): 
@@ -206,6 +199,27 @@ class maze(object):
 
                 if (row, col) == self.solve_end:
                     self.FillSquare((row, col), red)
+
+        font = pygame.font.Font(None, 18)
+        text = font.render("d-DFS Generate      r-Recursive DFS      p-Prim's Generate     c-Clear     s-Solve   t-Toggle Render" , 1, white)
+        textpos = text.get_rect()
+        textpos.bottom = screen.get_rect().bottom - base_offset/2
+        textpos.centerx = screen.get_rect().centerx
+        screen.blit(text, textpos)
+
+        font = pygame.font.Font(None, 18)
+        text = font.render("Erick's Maze Generator and Solver", 1, white)
+        textpos = text.get_rect()
+        textpos.bottom = screen.get_rect().top + base_offset/2
+        textpos.centerx = screen.get_rect().centerx
+        screen.blit(text, textpos)
+
+        font = pygame.font.Font(None, 18)
+        text = font.render("Currently: %s" % render_steps, 1, white)
+        textpos = text.get_rect()
+        textpos.top = screen.get_rect().bottom - base_offset/2 + 2
+        textpos.right = screen.get_rect().right - 30
+        screen.blit(text, textpos)
 
         pygame.display.flip()
         clock.tick(40)
