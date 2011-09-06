@@ -89,8 +89,6 @@ class node(object):
 class maze(object):
     """This class handles all of the maze generation and solving functions.
 
-    Should be treated as a singleton until I figure out this member variable thing.
-    
     For now this class will also take care of rendering the maze. Not sure if this is the best design but we'll use it for now"""
     
     def __init__(self):
@@ -117,7 +115,6 @@ class maze(object):
                     if event.key == pygame.K_d:
                         self.runAlgorithm(self.DFSGenerate)
                     elif event.key == pygame.K_p:
-                        #TODO: Implement Prim's method
                         self.runAlgorithm(self.PrimGenerate)
                     elif event.key == pygame.K_r:
                         self.runAlgorithm(self.DFSRecursive)
@@ -126,8 +123,29 @@ class maze(object):
                     elif event.key == pygame.K_t:
                         toggleRender()
 
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        node = self.nodes[self.solve_start[0]][self.solve_start[1]]
+                        if self.solve_start[1] > 0 and not node.IsStanding(west):
+                            self.moveCurrentSolve((self.solve_start[0], self.solve_start[1]-1))
+                    elif event.key == pygame.K_RIGHT:
+                        node = self.nodes[self.solve_start[0]][self.solve_start[1]]
+                        if self.solve_start[1] < grid_cols - 1 and not node.IsStanding(east):
+                            self.moveCurrentSolve((self.solve_start[0], self.solve_start[1]+1))
+                    elif event.key == pygame.K_UP:
+                        node = self.nodes[self.solve_start[0]][self.solve_start[1]]
+                        if self.solve_start[0] > 0 and not node.IsStanding(north):
+                            self.moveCurrentSolve((self.solve_start[0]-1, self.solve_start[1]))
+                    elif event.key == pygame.K_DOWN:
+                        node = self.nodes[self.solve_start[0]][self.solve_start[1]]
+                        if self.solve_start[0] < grid_rows -1 and not node.IsStanding(south):
+                            self.moveCurrentSolve((self.solve_start[0]+1, self.solve_start[1]))
             
             self.DrawScreen()
+
+    def moveCurrentSolve(self, newLoc):
+        self.solve_start = newLoc
+
 
     def randomLoc(self):
         row = random.randint(0,grid_rows-1)
@@ -136,6 +154,7 @@ class maze(object):
 
     def clearMaze(self):
         self.cellStack.clear()
+        self.solve_start = (0,0)
         #reinitialize all of the nodes
         for i in range(grid_rows):
             for j in range(grid_cols):
@@ -144,7 +163,7 @@ class maze(object):
         return
 
     def clearStatus(self):
-        for row  in self.nodes:
+        for row in self.nodes:
             for node in row:
                 node.status = untouched
         return
@@ -152,6 +171,7 @@ class maze(object):
     def runAlgorithm(self, algorithm):
         self.clearStatus()
         #start at a random location
+        # unless we're solving, then start at the solve start location
         start_loc = (0,0)
         if algorithm == self.DFSSolve:
             start_loc = self.solve_start
