@@ -70,9 +70,9 @@ class node(object):
         """ Return true if the node has all Walls up, 
             false otherwise """
         if  ((row < 0) or (row >= grid_rows)):
-                return False
+            return False
         if ((col < 0) and (col >= grid_col)):
-                return False
+            return False
 
         if ((row != 0) and not(self.IsStanding(north))):
             return False
