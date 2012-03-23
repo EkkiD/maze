@@ -20,7 +20,7 @@ var visited = 1;
 var stacked = 2;
 var current = 3;
 
-var render_steps = true;
+var render_steps = false;
 
 window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       || 
@@ -195,69 +195,72 @@ Maze.prototype.DFSGenerate = function(){
     if(maze.cellStack.length !== 0){
         window.requestAnimFrame(maze.DFSGenerate);
     }
-    if (maze.cellStack.length === 0) {return;}
-    var stacktop = maze.cellStack.pop();
-    var row =  stacktop[0];
-    var col = stacktop[1];
+    try{
+        var stacktop = maze.cellStack.pop();
+        var row =  stacktop[0];
+        var col = stacktop[1];
 
-    var node = maze.nodes[row][col];
-    node.stat = visited;
-    var neighbours = [];
+        var node = maze.nodes[row][col];
+        node.stat = visited;
+        var neighbours = [];
 
-    if ( (node.IsStanding(north)) && (maze.nodes[row-1][col].AreAllWallsUp(row-1, col))){
-        neighbours.push(north);
-    }
-    if ( (node.IsStanding(south)) && (maze.nodes[row+1][col].AreAllWallsUp(row+1, col))){
-        neighbours.push(south);
-    }
-    if ( (node.IsStanding(west)) && (maze.nodes[row][col-1].AreAllWallsUp(row, col-1))){
-        neighbours.push(west);
-    }
-    if ( (node.IsStanding(east)) && (maze.nodes[row][col+1].AreAllWallsUp(row, col+1))){
-        neighbours.push(east);
-    }
+        if ( (node.IsStanding(north)) && (maze.nodes[row-1][col].AreAllWallsUp(row-1, col))){
+            neighbours.push(north);
+        }
+        if ( (node.IsStanding(south)) && (maze.nodes[row+1][col].AreAllWallsUp(row+1, col))){
+            neighbours.push(south);
+        }
+        if ( (node.IsStanding(west)) && (maze.nodes[row][col-1].AreAllWallsUp(row, col-1))){
+            neighbours.push(west);
+        }
+        if ( (node.IsStanding(east)) && (maze.nodes[row][col+1].AreAllWallsUp(row, col+1))){
+            neighbours.push(east);
+        }
 
-    if (neighbours.length === 0){
-        stacktop = maze.cellStack.pop();
-        maze.nodes[stacktop[0]][stacktop[1]].stat = current;
+        if (neighbours.length === 0){
+            stacktop = maze.cellStack.pop();
+            maze.nodes[stacktop[0]][stacktop[1]].stat = current;
+            maze.cellStack.push(stacktop);
+            return;
+        }
+
+        var index = Math.floor(Math.random()*neighbours.length);
+        var direction = neighbours[index];
+        var new_loc = [0, 0];
+
+        if (direction & north){
+            maze.nodes[row-1][col].TearDown(south);
+            node.TearDown(north);
+            new_loc = [row-1, col];
+        }
+        if (direction & south){
+            maze.nodes[row+1][col].TearDown(north);
+            node.TearDown(south);
+            new_loc = [row+1, col];
+        }
+        if (direction & east){
+            maze.nodes[row][col+1].TearDown(west);
+            node.TearDown(east);
+            new_loc = [row, col+1];
+        }
+        if (direction & west){
+            maze.nodes[row][col-1].TearDown(east);
+            node.TearDown(west);
+            new_loc = [row, col-1];
+        }
+        node.stat = stacked;
         maze.cellStack.push(stacktop);
-//        if (render_steps){
-//            maze.DrawScreen();
-//        }
-        return;
+        maze.cellStack.push(new_loc);
+        maze.nodes[new_loc[0]][new_loc[1]].stat = current;
     }
-
-    var index = Math.floor(Math.random()*neighbours.length);
-    var direction = neighbours[index];
-    var new_loc = [0, 0];
-
-    if (direction & north){
-        maze.nodes[row-1][col].TearDown(south);
-        node.TearDown(north);
-        new_loc = [row-1, col];
+    catch(e){
+        if((e instanceof TypeError) && (e.message === "stacktop is undefined")){
+            return;
+        }
+        else{
+            throw e;
+        }
     }
-    if (direction & south){
-        maze.nodes[row+1][col].TearDown(north);
-        node.TearDown(south);
-        new_loc = [row+1, col];
-    }
-    if (direction & east){
-        maze.nodes[row][col+1].TearDown(west);
-        node.TearDown(east);
-        new_loc = [row, col+1];
-    }
-    if (direction & west){
-        maze.nodes[row][col-1].TearDown(east);
-        node.TearDown(west);
-        new_loc = [row, col-1];
-    }
-    node.stat = stacked;
-    maze.cellStack.push(stacktop);
-    maze.cellStack.push(new_loc);
-    maze.nodes[new_loc[0]][new_loc[1]].stat = current;
-//    if (render_steps){
-//        maze.DrawScreen();
-//    }
 };
 
 window.onload = function(){
