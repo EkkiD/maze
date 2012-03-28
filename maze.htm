@@ -5,6 +5,8 @@
     <title>Erick Dransch - Main</title>
     <link rel="stylesheet" type="text/css" href="styles.css" />
     <script type="text/javascript" src="maze.js"> </script>
+    <script type="text/javascript" src="DFS.js"> </script>
+    <script type="text/javascript" src="Prim.js"> </script>
   </head>
   <body>
     <div id="header">
@@ -16,14 +18,14 @@
     <div id="menu">
       <ul>
         <li><a id="current" href="">Main</a></li>
-        <li><a href="./about.htm">About Me</a></li>
-        <li><a href="./resume.htm">Resume</a></li>
-        <li><a href="./projects.htm">Projects</a></li>
       </ul>
     </div>
     <div id="content">
         <canvas id="myCanvas" width="700" height="600"> </canvas>
-        <input type="button" value="Go!" onclick="window.go()" />
+        <br />
+        <input type="button" value="DFS Generate" onclick="window.DFSGen()" />
+        <input type="button" value="Prim Generate" onclick="window.PrimGen()" />
+        <input type="button" value="Clear" onclick="window.clear()" />
         <input type="button" value="Draw!" onclick="window.draw()" />
     </div>
         
