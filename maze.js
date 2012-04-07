@@ -153,6 +153,7 @@ Maze.prototype.runAlgorithm = function(algorithm){
     start_x = 0; start_y = 0;
 
     if (algorithm === this.DFSSolve){
+        console.log("DFS Solve");
         start_x = this.solve_start_x;
         start_y = this.solve_start_y;
     }

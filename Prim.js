@@ -1,6 +1,6 @@
 Maze.prototype.addFringe = function(fringes, row, col){
     node = maze.nodes[row][col];
-    node.stat = stacked;
+    node.stat |= stacked;
     fringes.push([row, col]);
 };
 
@@ -22,24 +22,24 @@ Maze.prototype.AddIn = function(fringes, row, col){
     }
 
     // Mark the node as in.
-    node.stat = visited;
+    node.stat |= visited;
 };
 
 Maze.prototype.InNeighbours = function(fringe){
     var row = fringe[0]; var col = fringe[1];
     var neighbours = [];
 
-    if(  (row > 0) && (maze.nodes[row-1][col].stat & visited)){
-        neighbours.push([row-1, col]);
+    if( (row > 0) && (maze.nodes[row-1][col].stat & visited)){
+            neighbours.push([row-1, col]);
     }
-    if(  (row < grid_rows-1) && (maze.nodes[row+1][col].stat & visited)){
-        neighbours.push([row+1, col]);
+    if( (row < grid_rows-1) && (maze.nodes[row+1][col].stat & visited)){
+            neighbours.push([row+1, col]);
     }
     if( (col > 0) && (maze.nodes[row][col-1].stat & visited)){
-        neighbours.push([row, col-1]);
+            neighbours.push([row, col-1]);
     }
     if( (col < grid_cols-1) && (maze.nodes[row][col+1].stat & visited)){
-        neighbours.push([row, col+1]);
+            neighbours.push([row, col+1]);
     }
     return neighbours;
 };
@@ -70,23 +70,22 @@ Maze.prototype.PrimGenerate = function(){
     // Initialization for the first run
     if( maze.cellStack.length > 0 ) {
         var stacktop = maze.cellStack.pop();
-        maze.fringes.push(stacktop);
         row = stacktop[0]; col = stacktop[1];
         maze.AddIn(maze.fringes, row, col);
     }
     if(maze.fringes.length !== 0){
         window.requestAnimFrame(maze.PrimGenerate);
     }
+    else{ if(render_steps){ maze.DrawScreen(); } return; }
 
     // Choose a random fringe cell 
     var index = Math.floor(Math.random()*maze.fringes.length);
     fringe = maze.fringes[index];
     maze.fringes.splice(index, 1);
 
+
     maze.nodes[fringe[0]][fringe[1]].stat |= current;
-    if(render_steps){
-        maze.DrawScreen();
-    }
+    if(render_steps){ maze.DrawScreen(); }
     maze.nodes[fringe[0]][fringe[1]].stat ^= current;
 
     // Choose a random neighbour of the fringe and tear down the wall in between
