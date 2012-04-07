@@ -4,7 +4,7 @@ Maze.prototype.DFSGenerate = function(){
         maze.DrawScreen();
     }
     if(maze.cellStack.length !== 0){
-        window.requestAnimFrame(maze.DFSGenerate);
+        anim_request = window.requestAnimFrame(maze.DFSGenerate);
     }
     try{
         var stacktop = maze.cellStack.pop();

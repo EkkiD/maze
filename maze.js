@@ -22,6 +22,8 @@ var current = 3;
 
 var render_steps = true;
 
+var anim_request;
+
 window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       || 
     window.webkitRequestAnimationFrame || 
@@ -32,6 +34,9 @@ window.requestAnimFrame = (function(){
         window.setTimeout(callback, 1000 / 60);
     };
 }());
+
+
+window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 function Node(row, col) {
     this.stat = untouched;
@@ -167,6 +172,12 @@ Maze.prototype.runAlgorithm = function(algorithm){
 };
 
 Maze.prototype.clearMaze = function(){
+    // Cancel any animations that are in process.
+    if( anim_request ) {
+        window.cancelAnimationFrame(anim_request);
+        anim_request = null;
+    }
+
     this.cellStack = [];
     this.solve_start_x = 0;
     this.solve_start_y = 0;

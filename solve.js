@@ -15,7 +15,7 @@ Maze.prototype.DFSSolve = function(){
             return;
         }
         else{ 
-            window.requestAnimFrame(maze.DFSSolve);
+            anim_request = window.requestAnimFrame(maze.DFSSolve);
         }
         var row =  stacktop[0];
         var col = stacktop[1];

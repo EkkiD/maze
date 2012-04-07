@@ -74,7 +74,7 @@ Maze.prototype.PrimGenerate = function(){
         maze.AddIn(maze.fringes, row, col);
     }
     if(maze.fringes.length !== 0){
-        window.requestAnimFrame(maze.PrimGenerate);
+        anim_request = window.requestAnimFrame(maze.PrimGenerate);
     }
     else{ if(render_steps){ maze.DrawScreen(); } return; }
 
