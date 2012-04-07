@@ -173,7 +173,7 @@ Maze.prototype.runAlgorithm = function(algorithm){
 
 Maze.prototype.clearMaze = function(){
     // Cancel any animations that are in process.
-    if( anim_request ) {
+    while( anim_request ) {
         window.cancelAnimationFrame(anim_request);
         anim_request = null;
     }
