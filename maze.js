@@ -36,7 +36,16 @@ window.requestAnimFrame = (function(){
 }());
 
 
-window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+window.cancelAnimationFrame = (function(id){
+        return  window.cancelAnimationFrame || 
+        window.webkitCancelAnimationFrame || 
+        window.mozCancelAnimationFrame    || 
+        window.oCancelAnimationFrame      || 
+        window.msCancelAnimationFrame     || 
+        function(id){
+            window.cancelTimeout(id);
+        };
+}());
 
 function Node(row, col) {
     this.stat = untouched;
