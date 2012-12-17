@@ -122,13 +122,13 @@ function Maze(context){
                 var node = this.nodes[row][col];
                 var off_x = base_offset + col * square_pixels;
                 var off_y = base_offset + row * square_pixels;
-                if (node.IsStanding(north)){
+                if (node.IsStanding(north)) {
                     context.moveTo(off_x+2, off_y);
                     context.lineTo(off_x + square_pixels - 2, off_y);
                     context.strokeStyle = "white";
                     context.lineWidth = 2;
                 }
-                if (node.IsStanding(west)){
+                if (node.IsStanding(west)) {
                     context.moveTo(off_x, off_y+2);
                     context.lineTo(off_x, off_y+square_pixels-2);
                     context.strokeStyle = "white";
@@ -180,7 +180,7 @@ Maze.prototype.runAlgorithm = function(algorithm){
     this.DrawScreen();
 };
 
-Maze.prototype.clearMaze = function(){
+Maze.prototype.clearMaze = function() {
     // Cancel any animations that are in process.
     while( anim_request ) {
         window.cancelAnimationFrame(anim_request);
@@ -221,5 +221,11 @@ window.draw = function() {
 
 window.clear = function() {
     window.maze.clearMaze();
+};
+window.stop = function() {
+    while( anim_request ) {
+        window.cancelAnimationFrame(anim_request);
+        anim_request = null;
+    }
 };
 
