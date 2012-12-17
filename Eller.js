@@ -23,21 +23,21 @@ function NodeSet() {
 }
 
 NodeSet.prototype.unmark = function() {
-    for each (var node in this.nodes) { 
-        node.stat = visited;
+    for (var i = 0; i < this.nodes.length; i++){
+        this.nodes[i].stat = visited;
     }
 }
 
 NodeSet.prototype.mark = function() {
-    for each (var node in this.nodes) { 
-        node.stat = stacked;
+    for (var i = 0; i < this.nodes.length; i++){
+        this.nodes[i].stat = stacked;
     }
 }
 
 Maze.prototype.merge = function(set1, set2) {
     window.maze.nodeSets.splice(window.maze.nodeSets.indexOf(set2), 1);
-    for each (var node in set2.nodes) {
-        node.nodeSet = set1;
+    for (var i = 0; i < set2.nodes.length; i++){
+        set2.nodes[i].nodeSet = set1;
     }
     set1.nodes = set1.nodes.concat(set2.nodes);
     set2.nodes = [];
@@ -46,7 +46,8 @@ Maze.prototype.merge = function(set1, set2) {
 Maze.prototype.GetVerticals = function(row) {
     var maze = window.maze;
     var verticals = [];
-    for each (var aSet in maze.nodeSets) {
+    for (var i = 0; i < maze.nodeSets.length; i++){
+        var aSet = maze.nodeSets[i];
         nodes = aSet.nodes.filter(function(a) { return a.row === row; });
         nodes = randomize(nodes).slice(0, 1 + Math.floor(Math.random()*(nodes.length-1)));
         verticals = verticals.concat(nodes);
@@ -106,8 +107,10 @@ Maze.prototype.EllerPhase2 = function() {
 
 Maze.prototype.clearRow = function(row) {
     var maze = window.maze;
-    for each (var node in maze.nodes[row]){
-        node.stat = visited;
+    if (maze.nodes[row]) {
+        for (var i = 0; i < maze.nodes[row].length; i++) {
+            maze.nodes[row][i].stat = visited;
+        }
     }
 }
 
