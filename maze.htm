@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Erick Dransch - Main</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script type="text/javascript" src="maze.js"> </script>
+    <script type="text/javascript" src="DFS.js"> </script>
+    <script type="text/javascript" src="Prim.js"> </script>
+    <script type="text/javascript" src="Eller.js"> </script>
+    <script type="text/javascript" src="solve.js"> </script>
+  </head>
+  <body>
+    <div id="header">
+    </div>
+    
+    <div id="menu">
+      <ul>
+        <li><a id="Blog" href="http://www.erickdransch.com/blog">Blog</a></li>
+      </ul>
+    </div>
+    <div id="content">
+        <h2>Welcome to Erick's Maze Generator &amp; Solver</h2>
+        <canvas id="myCanvas" width="700" height="600"> </canvas>
+        <br />
+        <input type="button" value="DFS Generate" onclick="window.DFSGen()" />
+        <input type="button" value="Prim Generate" onclick="window.PrimGen()" />
+        <input type="button" value="Eller Generate" onclick="window.EllerGen()" />
+        <input type="button" value="Clear" onclick="window.clear()" />
+        <input type="button" value="Solve!" onclick="window.solve()" />
+        <input type="button" value="Stop!" onclick="window.stop()" />
+        <br />
+        <a href="https://github.com/EkkiD/maze">Source Code</a>
+    </div>
+        
+  </body>
+
+
+</html>

@@ -7,6 +7,11 @@
     <meta name="description" content="Maze : Hobby maze generator and solver written in Python2.7 rendering using PyGame">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <script type="text/javascript" src="maze.js"> </script>
+    <script type="text/javascript" src="DFS.js"> </script>
+    <script type="text/javascript" src="Prim.js"> </script>
+    <script type="text/javascript" src="Eller.js"> </script>
+    <script type="text/javascript" src="solve.js"> </script>
 
     <title>Maze</title>
   </head>
@@ -19,7 +24,7 @@
           <a id="forkme_banner" href="https://github.com/EkkiD/maze">View on GitHub</a>
 
           <h1 id="project_title">Maze</h1>
-          <h2 id="project_tagline">Hobby maze generator and solver written in Python2.7 rendering using PyGame</h2>
+          <h2 id="project_tagline">Hobby maze generator and solver originally written in Python2.7 rendering using PyGame. Now maintained in Javascript!</h2>
 
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/EkkiD/maze/zipball/master">Download this project as a .zip file</a>
@@ -31,12 +36,17 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p>Summer 2011 Fun Project</p>
-
-<p>Maze Generator and Solver </p>
-
-<p>Versions in both Python and Javascript.</p>
-      </section>
+            <br />
+            <input style="margin-left:50px" type="button" value="DFS Generate" onclick="window.DFSGen()" />
+            <input type="button" value="Prim Generate" onclick="window.PrimGen()" />
+            <input type="button" value="Eller Generate" onclick="window.EllerGen()" />
+            <input type="button" value="Clear" onclick="window.clear()" />
+            <input type="button" value="Solve!" onclick="window.solve()" />
+            <input type="button" value="Stop!" onclick="window.stop()" />
+            <canvas id="myCanvas" width="700" height="600"> </canvas>
+            <br />
+            <a href="https://github.com/EkkiD/maze">Source Code</a>
+          </section>
     </div>
 
     <!-- FOOTER  -->
